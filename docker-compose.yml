@@ -1,0 +1,25 @@
+version: '3.9'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    environment:
+      - PORT=${BACKEND_PORT:-8080}
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Используем явный localhost, чтобы браузер из контейнера ходил на проброшенный порт.
+        # Если меняете порт backend, задайте VITE_API_BASE/VITE_WS_BASE вручную.
+        VITE_API_BASE: ${VITE_API_BASE:-http://localhost:8080}
+        VITE_WS_BASE: ${VITE_WS_BASE:-ws://localhost:8080}
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-8081}:80"

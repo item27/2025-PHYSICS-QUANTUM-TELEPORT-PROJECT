@@ -1,0 +1,118 @@
+.steps {
+  display: grid;
+  gap: 12px;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+  transition: border-color 0.2s ease, transform 0.2s ease, filter 0.3s ease, box-shadow 0.3s ease;
+}
+
+.step-body {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.step--active {
+  border-color: var(--accent-cyan);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 34px rgba(56, 189, 248, 0.16);
+}
+
+.step-index {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(167, 139, 250, 0.2));
+  color: var(--text);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.step-icon {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(124, 58, 237, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(124, 58, 237, 0.2);
+}
+
+.step-icon--classical {
+  background: rgba(245, 158, 11, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.26);
+}
+
+.step-icon--warning {
+  background: rgba(248, 113, 113, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(248, 113, 113, 0.3);
+}
+
+.step[data-step-key='measure'].step--active {
+  filter: grayscale(0.1) blur(0.2px);
+  box-shadow: 0 18px 42px rgba(255, 255, 255, 0.06), 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.step[data-step-key='measure'] .step-index {
+  position: relative;
+  overflow: hidden;
+}
+
+.step[data-step-key='measure'] .step-index::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: repeating-linear-gradient(135deg, rgba(226, 232, 240, 0.18) 0 4px, transparent 4px 8px);
+  opacity: 0;
+  animation: flicker 2s ease-in-out infinite;
+}
+
+.step[data-step-key='measure'].step--active .step-index::after {
+  opacity: 0.6;
+}
+
+.step[data-step-key='send'].step--active .step-index {
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.5), 0 0 24px rgba(16, 185, 129, 0.25);
+}
+
+.step[data-step-key='reconstruct'].step--active .step-index {
+  box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.4), 0 0 24px rgba(124, 58, 237, 0.2);
+}
+
+@keyframes flicker {
+  0% {
+    opacity: 0.2;
+  }
+  40% {
+    opacity: 0.5;
+  }
+  80% {
+    opacity: 0.15;
+  }
+  100% {
+    opacity: 0.4;
+  }
+}
+
+.step-title {
+  margin: 0;
+  color: var(--text);
+  font-size: 15px;
+}
+
+.step-description {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}

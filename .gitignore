@@ -1,0 +1,20 @@
+# Go
+bin/
+*.exe
+*.log
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/*.tsbuildinfo
+frontend/tsconfig.*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
+frontend/src/**/*.js
+frontend/src/**/*.d.ts
+
+# Editor
+.DS_Store
+.idea/
+.vscode/

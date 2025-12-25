@@ -1,0 +1,41 @@
+.physics-alert {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.06), rgba(124, 58, 237, 0.04));
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+  align-items: center;
+}
+
+.physics-alert__icon {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: rgba(124, 58, 237, 0.12);
+}
+
+.physics-alert__title {
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.physics-alert__line {
+  margin: 2px 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.physics-alert--classical {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05));
+}
+
+.physics-alert--warning {
+  background: linear-gradient(135deg, rgba(248, 113, 113, 0.12), rgba(248, 113, 113, 0.05));
+  border-color: rgba(248, 113, 113, 0.4);
+}

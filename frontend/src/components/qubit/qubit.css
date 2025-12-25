@@ -1,0 +1,136 @@
+.qubit-card {
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  color: var(--text);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16);
+  transition: border-color 0.2s ease, transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.qubit-card--emphasis {
+  border-color: var(--accent-cyan);
+  transform: translateY(-2px);
+}
+
+.qubit-card--phase {
+  box-shadow: 0 12px 36px rgba(124, 58, 237, 0.2), 0 0 0 1px rgba(56, 189, 248, 0.15);
+}
+
+.qubit-card--active {
+  transform: translateY(-3px);
+}
+
+.qubit-card--idle {
+  transform: translateY(1px);
+  filter: saturate(0.85);
+}
+
+.qubit-card--decoherence {
+  filter: saturate(0.65) blur(0.2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+}
+
+.qubit-card--decoherence::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  background: radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.08), transparent 35%),
+    radial-gradient(circle at 80% 70%, rgba(56, 189, 248, 0.08), transparent 32%),
+    repeating-linear-gradient(135deg, rgba(226, 232, 240, 0.05) 0 6px, transparent 6px 12px);
+  opacity: 0.5;
+  pointer-events: none;
+  filter: blur(1px);
+}
+
+.qubit-phase-ring {
+  position: absolute;
+  inset: -22px;
+  border-radius: 16px;
+  background: conic-gradient(from 0deg, rgba(56, 189, 248, 0.08), rgba(124, 58, 237, 0.22), rgba(56, 189, 248, 0.08));
+  opacity: 0;
+  transform: scale(0.96);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  z-index: 0;
+  filter: blur(6px);
+}
+
+.qubit-card--phase .qubit-phase-ring {
+  opacity: 1;
+  transform: scale(1);
+  animation: phase-spin 9s linear infinite;
+}
+
+@keyframes phase-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.qubit-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.qubit-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.qubit-label {
+  font-size: 14px;
+  color: var(--text);
+  margin: 0;
+}
+
+.qubit-id {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0;
+}
+
+.qubit-state {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.qubit-hint {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.01em;
+}
+
+.qubit-state {
+  position: relative;
+  z-index: 1;
+}
+
+.qubit-card .bloch {
+  margin: 6px 0 4px;
+  z-index: 1;
+}
+
+.qubit-card .bloch__sphere {
+  width: 120px;
+  height: 120px;
+}
+
+@media (max-width: 640px) {
+  .qubit-card .bloch__sphere {
+    width: 100px;
+    height: 100px;
+  }
+}

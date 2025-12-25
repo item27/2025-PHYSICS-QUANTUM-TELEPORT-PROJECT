@@ -1,0 +1,109 @@
+openapi: 3.1.0
+info:
+  title: Quantum Teleportation Visualizer API
+  version: 0.1.0
+paths:
+  /healthz:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: Service is healthy
+  /api/sessions:
+    post:
+      summary: Create teleportation session
+      responses:
+        '200':
+          description: Session created
+  /api/sessions/{id}/join:
+    post:
+      summary: Join a specific role within a session lobby
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role:
+                  type: string
+                  enum: [alice, bob, charlie]
+                token:
+                  type: string
+                  description: Reuse an existing token for idempotent reconnect
+              required: [role]
+      responses:
+        '200':
+          description: Role reserved and token issued
+        '409':
+          description: Role already occupied
+  /api/sessions/{id}:
+    get:
+      summary: Get session state
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Current session state
+  /api/sessions/{id}/advance:
+    post:
+      summary: Advance session step
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Updated session state
+  /api/sessions/{id}/leave:
+    post:
+      summary: Explicitly release a reserved role
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                  description: Participant token bound to the role
+              required: [token]
+      responses:
+        '200':
+          description: Role freed and state broadcast
+  /api/ws:
+    get:
+      summary: WebSocket stream of session updates
+      parameters:
+        - in: query
+          name: session
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: token
+          required: true
+          schema:
+            type: string
+      responses:
+        '101':
+          description: WebSocket handshake

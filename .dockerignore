@@ -1,0 +1,11 @@
+# Go build artifacts
+/bin
+*.log
+*.out
+
+# Node dependencies and build
+frontend/node_modules
+frontend/dist
+
+# VCS
+.git
