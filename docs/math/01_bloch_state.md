@@ -1,18 +1,18 @@
-# Блоховское состояние: угол, фаза, радиус
+# Блоховское состояние: углы на сфере
 
-В проекте кубит описывается простой структурой: два угла и радиус. Это нужно только для **визуализации**, а не для физической симуляции.
+В проекте кубит описывается простой структурой: два угла. Это нужно только для **визуализации**, а не для физической симуляции.
 
 ## Где это задаётся
 
 ### Backend (Go)
 
-Функция `randomBlochState` выбирает случайный угол, но специально избегает полюсов — так точка на сфере выглядит заметнее.
+Функция `randomBlochState` выбирает случайный угол, но специально избегает полюсов - так точка на сфере выглядит заметнее.
 
 ```go
 func randomBlochState() qubit.BlochState {
     theta := (0.2 * math.Pi) + r.Float64()*(0.6*math.Pi)
     phi := r.Float64() * 2 * math.Pi
-    return qubit.BlochState{Theta: theta, Phi: phi, Radius: 1}
+    return qubit.BlochState{Theta: theta, Phi: phi}
 }
 ```
 
@@ -26,7 +26,7 @@ func randomBlochState() qubit.BlochState {
 function randomBlochState(): BlochVector {
   const theta = 0.2 * Math.PI + Math.random() * 0.6 * Math.PI;
   const phi = Math.random() * 2 * Math.PI;
-  return { theta, phi, radius: 1 };
+  return { theta, phi };
 }
 ```
 
@@ -48,14 +48,14 @@ function normalizePhi(phi: number) {
 
 ## Коллапс после измерения
 
-При измерении визуально уменьшаем радиус и фиксируем направление. Это показывает «потерю» исходной суперпозиции.
+При измерении визуально фиксируем направление и показываем коллапс на полюсе сферы.
 
 ```go
 func collapseBloch(initial qubit.BlochState) qubit.BlochState {
     if math.Cos(initial.Theta) >= 0 {
-        return qubit.BlochState{Theta: 0, Phi: 0, Radius: 0.68}
+        return qubit.BlochState{Theta: 0, Phi: 0}
     }
-    return qubit.BlochState{Theta: math.Pi, Phi: 0, Radius: 0.68}
+    return qubit.BlochState{Theta: math.Pi, Phi: 0}
 }
 ```
 

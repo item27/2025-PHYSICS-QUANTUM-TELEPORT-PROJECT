@@ -3,25 +3,22 @@ import './qubit.css';
 
 export type QubitView = {
   id: string;
-  role: 'alice' | 'bob' | 'charlie';
+  role: 'alice' | 'bob';
   state: string;
   bloch: {
     theta: number;
     phi: number;
-    radius?: number;
   };
 };
 
 const roleLabels: Record<QubitView['role'], string> = {
   alice: 'Алиса',
   bob: 'Боб',
-  charlie: 'Чарли',
 };
 
 const roleAccent: Record<QubitView['role'], string> = {
   alice: '#7c3aed',
   bob: '#10b981',
-  charlie: '#38bdf8',
 };
 
 interface Props {

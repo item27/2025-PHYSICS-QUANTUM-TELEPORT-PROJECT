@@ -25,11 +25,10 @@ func TestRouterTeleportationFlow(t *testing.T) {
 
 	session := createSessionRequest(t, server.URL)
 
-	charlieToken := joinRole(t, server.URL, session.ID, "charlie", "")
 	aliceToken := joinRole(t, server.URL, session.ID, "alice", "")
 	bobToken := joinRole(t, server.URL, session.ID, "bob", "")
 
-	session = advanceSession(t, server.URL, session.ID, charlieToken)
+	session = advanceSession(t, server.URL, session.ID, bobToken)
 	if session.StepIndex != 1 {
 		t.Fatalf("expected to be on combine step, got %d", session.StepIndex)
 	}

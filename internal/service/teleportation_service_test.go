@@ -25,21 +25,21 @@ func TestCreateSessionInitialState(t *testing.T) {
 	if len(session.Steps) == 0 {
 		t.Fatal("expected default steps to be populated")
 	}
-	if len(session.Participants) != 3 {
-		t.Fatalf("expected 3 participants, got %d", len(session.Participants))
+	if len(session.Participants) != 2 {
+		t.Fatalf("expected 2 participants, got %d", len(session.Participants))
 	}
 	for role, participant := range session.Participants {
 		if participant.Taken {
 			t.Fatalf("role %s should not be taken initially", role)
 		}
 	}
-	if len(session.Qubits) != 3 {
-		t.Fatalf("expected 3 qubits, got %d", len(session.Qubits))
+	if len(session.Qubits) != 2 {
+		t.Fatalf("expected 2 qubits, got %d", len(session.Qubits))
 	}
 	if len(session.Log) == 0 {
 		t.Fatal("expected session log to contain creation entry")
 	}
-	if session.HiddenState.Radius == 0 {
+	if session.HiddenState.Theta == 0 && session.HiddenState.Phi == 0 {
 		t.Fatal("expected hidden state to be initialized")
 	}
 }
@@ -89,15 +89,10 @@ func TestAdvanceStepHonorsRolePermissions(t *testing.T) {
 
 	alice, _ := service.JoinSession(session.ID, qubit.RoleAlice, "")
 	bob, _ := service.JoinSession(session.ID, qubit.RoleBob, "")
-	charlie, _ := service.JoinSession(session.ID, qubit.RoleCharlie, "")
 
-	if _, err := service.AdvanceStep(session.ID, alice.Token); err == nil {
-		t.Fatal("expected alice to be blocked on entangle step")
-	}
-
-	afterEntangle, err := service.AdvanceStep(session.ID, charlie.Token)
+	afterEntangle, err := service.AdvanceStep(session.ID, bob.Token)
 	if err != nil {
-		t.Fatalf("expected charlie to advance session, got %v", err)
+		t.Fatalf("expected bob to advance session, got %v", err)
 	}
 	if afterEntangle.StepIndex != 1 {
 		t.Fatalf("expected step index 1 after first advance, got %d", afterEntangle.StepIndex)
@@ -106,8 +101,8 @@ func TestAdvanceStepHonorsRolePermissions(t *testing.T) {
 		t.Fatalf("expected alice qubit state to reflect combine step, got %s", afterEntangle.Qubits[0].State)
 	}
 
-	if _, err := service.AdvanceStep(session.ID, charlie.Token); err == nil {
-		t.Fatal("expected charlie to be blocked on combine step")
+	if _, err := service.AdvanceStep(session.ID, bob.Token); err == nil {
+		t.Fatal("expected bob to be blocked on combine step")
 	}
 
 	afterCombine, err := service.AdvanceStep(session.ID, alice.Token)
@@ -153,18 +148,18 @@ func TestLeaveSessionReleasesRole(t *testing.T) {
 	service := NewTeleportationService()
 	session, _ := service.CreateSession()
 
-	participant, _ := service.JoinSession(session.ID, qubit.RoleCharlie, "")
+	participant, _ := service.JoinSession(session.ID, qubit.RoleBob, "")
 
-	beforeLeave := service.sessions[session.ID].Participants[qubit.RoleCharlie]
+	beforeLeave := service.sessions[session.ID].Participants[qubit.RoleBob]
 	beforeLeave.LastSeen = time.Now().Add(-time.Hour)
-	service.sessions[session.ID].Participants[qubit.RoleCharlie] = beforeLeave
+	service.sessions[session.ID].Participants[qubit.RoleBob] = beforeLeave
 
 	updated, err := service.LeaveSession(session.ID, participant.Token)
 	if err != nil {
 		t.Fatalf("expected leave to succeed, got %v", err)
 	}
 
-	released := updated.Participants[qubit.RoleCharlie]
+	released := updated.Participants[qubit.RoleBob]
 	if released.Taken || released.Token != "" || released.Connected {
 		t.Fatalf("expected role to be released, got %+v", released)
 	}

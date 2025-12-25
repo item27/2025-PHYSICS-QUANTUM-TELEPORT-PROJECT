@@ -4,17 +4,15 @@ package qubit
 type Role string
 
 const (
-	RoleAlice   Role = "alice"
-	RoleBob     Role = "bob"
-	RoleCharlie Role = "charlie"
+	RoleAlice Role = "alice"
+	RoleBob   Role = "bob"
 )
 
 // BlochState stores spherical coordinates of a qubit on the Bloch sphere.
-// Angles are expressed in radians; radius is used to depict decoherence visually.
+// Angles are expressed in radians.
 type BlochState struct {
-	Theta  float64 `json:"theta"`
-	Phi    float64 `json:"phi"`
-	Radius float64 `json:"radius,omitempty"`
+	Theta float64 `json:"theta"`
+	Phi   float64 `json:"phi"`
 }
 
 // Qubit describes a simplified qubit within the visualizer.

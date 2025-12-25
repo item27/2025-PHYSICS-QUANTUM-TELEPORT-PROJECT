@@ -4,15 +4,14 @@
 
 ## Где это происходит
 
-Главная логика — в `AdvanceStep`, где для каждого шага меняются статус и параметры визуализации.
+Главная логика - в `AdvanceStep`, где для каждого шага меняются статус и параметры визуализации.
 
 ```go
 switch session.CurrentStep().Key {
 case teleportation.StepEntangle:
-    session.Qubits[2].Bloch = equatorBloch(session.HiddenState.Phi)
     session.Qubits[1].Bloch = equatorBloch(session.HiddenState.Phi + math.Pi/2)
 case teleportation.StepCombine:
-    session.Qubits[2].Bloch = equatorBloch(session.HiddenState.Phi + math.Pi/3)
+    session.Qubits[1].Bloch = equatorBloch(session.HiddenState.Phi + math.Pi/3)
 case teleportation.StepMeasure:
     session.Qubits[0].Bloch = collapseBloch(session.HiddenState)
 case teleportation.StepReconstruct:
@@ -32,7 +31,6 @@ session := &teleportation.SessionState{
     Qubits: []qubit.Qubit{
         {ID: "q1", Role: qubit.RoleAlice, Bloch: unknownState},
         {ID: "q2", Role: qubit.RoleBob, Bloch: bobBase},
-        {ID: "q3", Role: qubit.RoleCharlie, Bloch: charlieBase},
     },
 }
 ```

@@ -28,7 +28,6 @@ func TestTeleportationEndToEndWithWebsocketBroadcasts(t *testing.T) {
 	defer server.Close()
 
 	session := createSession(t, server.URL)
-	charlie := joinRole(t, server.URL, session.ID, "charlie", "")
 	alice := joinRole(t, server.URL, session.ID, "alice", "")
 	bob := joinRole(t, server.URL, session.ID, "bob", "")
 
@@ -42,9 +41,9 @@ func TestTeleportationEndToEndWithWebsocketBroadcasts(t *testing.T) {
 	expectJoined(t, bobConn, session.ID, qubit.RoleBob)
 	waitForStep(t, bobConn, 0)
 
-	session = advanceSession(t, server.URL, session.ID, charlie)
+	session = advanceSession(t, server.URL, session.ID, bob)
 	if session.StepIndex != 1 {
-		t.Fatalf("expected charlie to move to combine step, got %d", session.StepIndex)
+		t.Fatalf("expected bob to move to combine step, got %d", session.StepIndex)
 	}
 	waitForStep(t, aliceConn, 1)
 	waitForStep(t, bobConn, 1)

@@ -55,7 +55,11 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.logger.Info("ws connected", slog.String("session", sessionID), slog.String("role", string(role)))
-	_ = conn.WriteJSON(service.BroadcastMessage{Type: "joined", Global: session, Local: service.LocalView{Role: role}})
+	h.service.WriteToListener(sessionID, conn, service.BroadcastMessage{
+		Type:   "joined",
+		Global: session,
+		Local:  service.LocalView{Role: role},
+	})
 	h.service.Broadcast(sessionID)
 	go h.readLoop(sessionID, conn)
 }

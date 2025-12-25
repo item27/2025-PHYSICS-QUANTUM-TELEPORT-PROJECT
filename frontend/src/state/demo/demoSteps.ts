@@ -5,7 +5,7 @@ export const demoSteps: Step[] = [
   {
     key: 'entangle',
     title: 'Подготовка запутанной пары',
-    description: 'Чарли создаёт пару и распределяет кубиты Алисе и Бобу. Без общей пары телепортация невозможна.',
+    description: 'Алиса или Боб создают общую пару. Без общей запутанности телепортация невозможна.',
   },
   {
     key: 'combine',
@@ -45,29 +45,27 @@ function normalizePhi(phi: number) {
 function randomBlochState(): BlochVector {
   const theta = 0.2 * Math.PI + Math.random() * 0.6 * Math.PI; // избегаем полюсов для наглядности
   const phi = Math.random() * 2 * Math.PI;
-  return { theta, phi, radius: 1 };
+  return { theta, phi };
 }
 
 export function collapseBloch(initial: BlochVector): BlochVector {
   if (Math.cos(initial.theta) >= 0) {
-    return { theta: 0, phi: 0, radius: 0.68 };
+    return { theta: 0, phi: 0 };
   }
-  return { theta: Math.PI, phi: 0, radius: 0.68 };
+  return { theta: Math.PI, phi: 0 };
 }
 
 export function equatorBloch(phi: number): BlochVector {
-  return { theta: Math.PI / 2, phi: normalizePhi(phi), radius: 1 };
+  return { theta: Math.PI / 2, phi: normalizePhi(phi) };
 }
 
 export function createInitialDemoState() {
   const teleported = randomBlochState();
-  const charlie = equatorBloch(teleported.phi);
-  const bob = { theta: 0, phi: 0, radius: 1 };
+  const bob = { theta: 0, phi: 0 };
 
   const qubits: QubitView[] = [
     { id: '1', role: 'alice', state: 'Неизвестное состояние', bloch: teleported },
     { id: '2', role: 'bob', state: 'Чистое состояние', bloch: bob },
-    { id: '3', role: 'charlie', state: 'Запутанная пара', bloch: charlie },
   ];
 
   return { qubits, teleported };

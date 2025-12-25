@@ -1,8 +1,8 @@
 .qubit-card {
     background: var(--panel-soft);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 16px;
+    border-radius: 16px;
+    padding: 18px 20px;
     color: var(--text);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16);
     transition:
@@ -101,41 +101,41 @@
 .qubit-header {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding-bottom: 8px;
-    margin-bottom: 8px;
+    gap: 12px;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
     border-bottom: 1px solid var(--border);
 }
 
 .qubit-dot {
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
     flex-shrink: 0;
 }
 
 .qubit-label {
-    font-size: 14px;
+    font-size: 16px;
     color: var(--text);
     margin: 0;
 }
 
 .qubit-id {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--muted);
     margin: 0;
 }
 
 .qubit-state {
     margin: 0;
-    font-size: 14px;
+    font-size: 16px;
     color: var(--text);
 }
 
 .qubit-hint {
     margin: 6px 0 0;
     color: var(--muted);
-    font-size: 12px;
+    font-size: 13px;
     letter-spacing: 0.01em;
 }
 
@@ -145,19 +145,19 @@
 }
 
 .qubit-card .bloch {
-    margin: 6px 0 4px;
+    margin: 8px 0 6px;
     z-index: 1;
 }
 
 .qubit-card .bloch__sphere {
-    width: 120px;
-    height: 120px;
+    width: 220px;
+    height: 220px;
 }
 
 @media (max-width: 640px) {
     .qubit-card .bloch__sphere {
-        width: 100px;
-        height: 100px;
+        width: 180px;
+        height: 180px;
     }
 }
 
@@ -167,10 +167,10 @@
 
 .qubit-phase-ring {
     position: absolute;
-    top: -100%;
-    left: -100%;
-    width: 300%;
-    height: 300%;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
 }
 
 .qubit-card.qubit-card--phase {

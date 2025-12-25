@@ -19,13 +19,11 @@ interface Props {
 const roleAccent: Record<QubitView['role'], string> = {
   alice: '#7c3aed',
   bob: '#10b981',
-  charlie: '#38bdf8',
 };
 
 const roleTitle: Record<QubitView['role'], string> = {
   alice: 'Алиса',
   bob: 'Боб',
-  charlie: 'Чарли',
 };
 
 type Connection = {
@@ -39,28 +37,14 @@ type Connection = {
 function resolveConnections(stepKey?: StepKey): Connection[] {
   return [
     {
-      id: 'charlie-alice',
-      from: 'charlie',
-      to: 'alice',
-      label: 'Распределение пары',
+      id: 'alice-bob-entangle',
+      from: 'alice',
+      to: 'bob',
+      label: 'Запутанная пара',
       active: stepKey === 'entangle' || stepKey === 'combine',
     },
     {
-      id: 'charlie-bob',
-      from: 'charlie',
-      to: 'bob',
-      label: 'Запутанность с Бобом',
-      active: stepKey === 'entangle' || stepKey === 'reconstruct' || stepKey === 'complete',
-    },
-    {
-      id: 'alice-charlie',
-      from: 'alice',
-      to: 'charlie',
-      label: 'Совмещение состояния',
-      active: stepKey === 'combine' || stepKey === 'measure',
-    },
-    {
-      id: 'alice-bob',
+      id: 'alice-bob-classical',
       from: 'alice',
       to: 'bob',
       label: 'Классические биты',

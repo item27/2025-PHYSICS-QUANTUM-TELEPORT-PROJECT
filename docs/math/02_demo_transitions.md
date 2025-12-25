@@ -4,11 +4,10 @@
 
 ## Смещение фазы при запутывании
 
-После шага `entangle` Боб получает фазовый сдвиг, а Чарли остаётся в экваториальной плоскости.
+После шага `entangle` Боб получает фазовый сдвиг, чтобы подчеркнуть общую пару.
 
 ```ts
 case 'entangle':
-  if (qubit.role === 'charlie') return { ...qubit, bloch: equatorBloch(teleported.phi) };
   if (qubit.role === 'bob') return { ...qubit, bloch: equatorBloch(teleported.phi + Math.PI / 2) };
 ```
 
@@ -16,12 +15,12 @@ case 'entangle':
 
 ## Дополнительный поворот на шаге объединения
 
-Алиса помечается как «связанная», а Чарли получает небольшой дополнительный поворот — это подчёркивает изменение состояния пары.
+Алиса помечается как «связанная», а Боб получает небольшой дополнительный поворот - это подчёркивает изменение состояния пары.
 
 ```ts
 case 'combine':
   if (qubit.role === 'alice') return { ...qubit, state: 'Связана с парой' };
-  if (qubit.role === 'charlie') return { ...qubit, bloch: equatorBloch(teleported.phi + Math.PI / 3) };
+  if (qubit.role === 'bob') return { ...qubit, bloch: equatorBloch(teleported.phi + Math.PI / 3) };
 ```
 
 Источник: `frontend/src/state/demo/useDemoState.ts`

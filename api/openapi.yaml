@@ -33,7 +33,7 @@ paths:
               properties:
                 role:
                   type: string
-                  enum: [alice, bob, charlie]
+                  enum: [alice, bob]
                 token:
                   type: string
                   description: Reuse an existing token for idempotent reconnect

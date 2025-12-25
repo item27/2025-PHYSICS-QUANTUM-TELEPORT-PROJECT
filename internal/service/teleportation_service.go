@@ -18,15 +18,20 @@ import (
 type TeleportationService struct {
 	mu         sync.RWMutex
 	sessions   map[string]*teleportation.SessionState
-	listeners  map[string]map[*websocket.Conn]qubit.Role
+	listeners  map[string]map[*websocket.Conn]*listener
 	stepPreset []teleportation.StepInfo
 	ttl        time.Duration
+}
+
+type listener struct {
+	role qubit.Role
+	mu   sync.Mutex
 }
 
 // NewTeleportationService constructs a service with default steps.
 func NewTeleportationService() *TeleportationService {
 	steps := []teleportation.StepInfo{
-		{Key: teleportation.StepEntangle, Title: "Подготовка запутанной пары", Description: "Чарли создаёт пару кубитов и отправляет по одному Алисе и Бобу."},
+		{Key: teleportation.StepEntangle, Title: "Подготовка запутанной пары", Description: "Алиса или Боб создают общую пару кубитов для телепортации."},
 		{Key: teleportation.StepCombine, Title: "Объединение состояний", Description: "Алиса соединяет свой неизвестный кубит с полученной запутанной частицей."},
 		{Key: teleportation.StepMeasure, Title: "Измерение Алисы", Description: "Алиса делает парное измерение, разрушая исходное состояние."},
 		{Key: teleportation.StepSend, Title: "Классическая передача", Description: "Результаты измерения отправляются Бобу по обычному каналу связи."},
@@ -36,7 +41,7 @@ func NewTeleportationService() *TeleportationService {
 
 	return &TeleportationService{
 		sessions:   make(map[string]*teleportation.SessionState),
-		listeners:  make(map[string]map[*websocket.Conn]qubit.Role),
+		listeners:  make(map[string]map[*websocket.Conn]*listener),
 		stepPreset: steps,
 		ttl:        60 * time.Second,
 	}
@@ -50,13 +55,11 @@ func (s *TeleportationService) CreateSession() (*teleportation.SessionState, err
 	}
 
 	unknownState := randomBlochState()
-	bobBase := qubit.BlochState{Theta: 0, Phi: 0, Radius: 1}
-	charlieBase := equatorBloch(unknownState.Phi)
+	bobBase := qubit.BlochState{Theta: 0, Phi: 0}
 
 	participants := map[qubit.Role]teleportation.Participant{
-		qubit.RoleAlice:   {Role: qubit.RoleAlice, Taken: false},
-		qubit.RoleBob:     {Role: qubit.RoleBob, Taken: false},
-		qubit.RoleCharlie: {Role: qubit.RoleCharlie, Taken: false},
+		qubit.RoleAlice: {Role: qubit.RoleAlice, Taken: false},
+		qubit.RoleBob:   {Role: qubit.RoleBob, Taken: false},
 	}
 
 	now := time.Now()
@@ -69,7 +72,6 @@ func (s *TeleportationService) CreateSession() (*teleportation.SessionState, err
 		Qubits: []qubit.Qubit{
 			{ID: "q1", Role: qubit.RoleAlice, State: "Неизвестное состояние", Bloch: unknownState},
 			{ID: "q2", Role: qubit.RoleBob, State: "Чистое состояние", Bloch: bobBase},
-			{ID: "q3", Role: qubit.RoleCharlie, State: "Запутанная пара", Bloch: charlieBase},
 		},
 		Log: []string{"Сессия создана, роли свободны."},
 	}
@@ -165,12 +167,11 @@ func (s *TeleportationService) AdvanceStep(id string, token string) (*teleportat
 
 	switch session.CurrentStep().Key {
 	case teleportation.StepEntangle:
-		session.Qubits[2].State = "Запутанная пара готова"
-		session.Qubits[2].Bloch = equatorBloch(session.HiddenState.Phi)
+		session.Qubits[1].State = "Запутанная пара готова"
 		session.Qubits[1].Bloch = equatorBloch(session.HiddenState.Phi + math.Pi/2)
 	case teleportation.StepCombine:
 		session.Qubits[0].State = "Связан с парой"
-		session.Qubits[2].Bloch = equatorBloch(session.HiddenState.Phi + math.Pi/3)
+		session.Qubits[1].Bloch = equatorBloch(session.HiddenState.Phi + math.Pi/3)
 	case teleportation.StepMeasure:
 		session.Qubits[0].State = "Измерен"
 		session.Qubits[0].Bloch = collapseBloch(session.HiddenState)
@@ -218,8 +219,8 @@ func (s *TeleportationService) LeaveSession(id string, token string) (*teleporta
 	session.Log = append(session.Log, "Роль освобождена: "+string(role))
 
 	conns := s.listeners[id]
-	for conn, r := range conns {
-		if r == role {
+	for conn, entry := range conns {
+		if entry.role == role {
 			_ = conn.Close()
 			delete(conns, conn)
 		}
@@ -232,7 +233,7 @@ func (s *TeleportationService) LeaveSession(id string, token string) (*teleporta
 func allowedForStep(step teleportation.Step, role qubit.Role) bool {
 	switch step {
 	case teleportation.StepEntangle:
-		return role == qubit.RoleCharlie
+		return role == qubit.RoleAlice || role == qubit.RoleBob
 	case teleportation.StepCombine:
 		return role == qubit.RoleAlice
 	case teleportation.StepMeasure:
@@ -273,9 +274,9 @@ func (s *TeleportationService) RegisterListener(sessionID string, token string, 
 	}
 
 	if _, exists := s.listeners[sessionID]; !exists {
-		s.listeners[sessionID] = make(map[*websocket.Conn]qubit.Role)
+		s.listeners[sessionID] = make(map[*websocket.Conn]*listener)
 	}
-	s.listeners[sessionID][conn] = role
+	s.listeners[sessionID][conn] = &listener{role: role}
 
 	participant := session.Participants[role]
 	participant.Connected = true
@@ -288,30 +289,29 @@ func (s *TeleportationService) RegisterListener(sessionID string, token string, 
 // UnregisterListener removes a WebSocket connection from updates.
 func (s *TeleportationService) UnregisterListener(sessionID string, conn *websocket.Conn) {
 	s.mu.Lock()
-	role, ok := s.listeners[sessionID][conn]
+	entry, ok := s.listeners[sessionID][conn]
 	if ok {
-		participant := s.sessions[sessionID].Participants[role]
+		participant := s.sessions[sessionID].Participants[entry.role]
 		participant.Connected = false
 		participant.LastSeen = time.Now()
-		s.sessions[sessionID].Participants[role] = participant
+		s.sessions[sessionID].Participants[entry.role] = participant
 	}
 	delete(s.listeners[sessionID], conn)
 	session := s.sessions[sessionID]
-	s.mu.Unlock()
-
 	if session != nil {
 		s.broadcastLocked(session)
 	}
+	s.mu.Unlock()
 }
 
 // Broadcast pushes the latest session view to all listeners.
 func (s *TeleportationService) Broadcast(sessionID string) {
 	s.mu.RLock()
 	session := s.sessions[sessionID]
-	s.mu.RUnlock()
 	if session != nil {
 		s.broadcastLocked(session)
 	}
+	s.mu.RUnlock()
 }
 
 // LocalView carries role-specific data.
@@ -331,7 +331,7 @@ func randomBlochState() qubit.BlochState {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	theta := (0.2 * math.Pi) + r.Float64()*(0.6*math.Pi) // избегаем полюсов для наглядности
 	phi := r.Float64() * 2 * math.Pi
-	return qubit.BlochState{Theta: theta, Phi: phi, Radius: 1}
+	return qubit.BlochState{Theta: theta, Phi: phi}
 }
 
 func equatorBloch(phi float64) qubit.BlochState {
@@ -339,26 +339,41 @@ func equatorBloch(phi float64) qubit.BlochState {
 	if normalized < 0 {
 		normalized += 2 * math.Pi
 	}
-	return qubit.BlochState{Theta: math.Pi / 2, Phi: normalized, Radius: 1}
+	return qubit.BlochState{Theta: math.Pi / 2, Phi: normalized}
 }
 
 func collapseBloch(initial qubit.BlochState) qubit.BlochState {
 	if math.Cos(initial.Theta) >= 0 {
-		return qubit.BlochState{Theta: 0, Phi: 0, Radius: 0.68}
+		return qubit.BlochState{Theta: 0, Phi: 0}
 	}
-	return qubit.BlochState{Theta: math.Pi, Phi: 0, Radius: 0.68}
+	return qubit.BlochState{Theta: math.Pi, Phi: 0}
 }
 
 // broadcastLocked sends the current session state to all listeners with scoped local data.
 func (s *TeleportationService) broadcastLocked(session *teleportation.SessionState) {
 	conns := s.listeners[session.ID]
-	for conn, role := range conns {
-		local := LocalView{Role: role}
+	for conn, entry := range conns {
+		local := LocalView{Role: entry.role}
 		for _, qb := range session.Qubits {
-			if qb.Role == role {
+			if qb.Role == entry.role {
 				local.State = qb.State
 			}
 		}
+		entry.mu.Lock()
 		_ = conn.WriteJSON(BroadcastMessage{Type: "state_update", Global: session, Local: local})
+		entry.mu.Unlock()
 	}
+}
+
+// WriteToListener sends a message to a specific WebSocket connection with write locking.
+func (s *TeleportationService) WriteToListener(sessionID string, conn *websocket.Conn, message BroadcastMessage) {
+	s.mu.RLock()
+	entry, ok := s.listeners[sessionID][conn]
+	s.mu.RUnlock()
+	if !ok {
+		return
+	}
+	entry.mu.Lock()
+	_ = conn.WriteJSON(message)
+	entry.mu.Unlock()
 }
